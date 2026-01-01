@@ -4,33 +4,33 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.jetpackandroid.ui.theme.JetpackAndroidTheme
 
 
@@ -77,65 +77,131 @@ fun RoundInitialsPreview() {
 }
 
 @Composable
-fun ContactColumn(contact: Contact) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .background(Color.LightGray)
-            .padding(8.dp)
+fun ContactCard(contact: Contact) {
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(
-            modifier = Modifier.weight(1F),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.LightGray)
+                .weight(0.25f),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
         ) {
-            Text("Имя: ${contact.name}")
-            Text("Отчество: ${contact.surname.orEmpty()}")
-            Text("Фамилия: ${contact.familyName}")
-            Text("Мобильный телефон: ${contact.phone}")
-            Text("Адрес: ${contact.address}")
+
+            if (contact.imageRes != null) {
+                Image(
+                    painter = painterResource(contact.imageRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = contact.initials(),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                text = "${contact.name} ${contact.surname.orEmpty()}".trim(),
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = contact.familyName,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+
+                if (contact.isFavorite) {
+                    Spacer(Modifier.width(8.dp))
+                    Image(
+                        painter = painterResource(id = android.R.drawable.star_big_on),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
         }
-        if (contact.isFavorite) Image(
-            modifier = Modifier.padding(start = 16.dp)
-                .align(Alignment.CenterVertically),
-            painter = painterResource(id = android.R.drawable.star_big_on),
-            contentDescription = null
-        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.75f)
+                .padding(horizontal = 24.dp, vertical = 20.dp)
+        ) {
+
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(text = stringResource(R.string.phone))
+                Spacer(Modifier.height(12.dp))
+                Text(text = stringResource(R.string.address))
+                Spacer(Modifier.height(12.dp))
+                Text(text = stringResource(R.string.email))
+            }
+
+            Spacer(Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.weight(2f),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(text = contact.phone)
+                Spacer(Modifier.height(12.dp))
+                Text(text = contact.address)
+                Spacer(Modifier.height(12.dp))
+                Text(text = contact.email ?: "—")
+            }
+        }
     }
 }
 
+@Preview
 @Composable
-fun Contacts(items: List<Contact>) {
-    Column { items.forEach { ContactColumn(it) } }
+fun ContactWithoutImage() {
+    ContactCard(
+        Contact(
+            name = "Артур",
+            surname = "Сафиуллин",
+            familyName = "Ринатович",
+            isFavorite = true,
+            phone = "+79845621385",
+            address = "ул. Котельников дом 28",
+            email = "art22061993@gmail.com"
+        )
+    )
 }
 
-@Preview(name = "portrait", showSystemUi = true)
+@Preview
 @Composable
-fun ListPreview() {
-    Contacts(
-        listOf(
-            Contact(
-                name = "Евгений",
-                surname = "Андреевич",
-                familyName = "Лукашин",
-                phone = "+7 495 495 95 95",
-                address = "г. Москва, 3-я улица Строителей, д. 25, кв. 12",
-                isFavorite = true
-            ),
-            Contact(
-                name = "Василий",
-                surname = "Егорович",
-                familyName = "Кузякин",
-                phone = " --- ",
-                address = "Ивановская область, дер. Крутово, д. 4"
-            ),
-            Contact(
-                name = "Людмила",
-                surname = "Прокофьевна",
-                familyName = "Калугина",
-                phone = "+7 495 788 78 78",
-                address = "Москва, Большая Никитская, д. 43, кв. 290"
-            )
+fun ContactWithImage() {
+    ContactCard(
+        Contact(
+            name = "Артур",
+            surname = "Сафиуллин",
+            familyName = "Ринатович",
+            isFavorite = true,
+            phone = "+79845621385",
+            address = "ул. Котельников дом 28",
+            imageRes = R.drawable.man
         )
     )
 }

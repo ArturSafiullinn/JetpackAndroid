@@ -9,4 +9,12 @@ data class Contact(
     val phone: String, //Телефон
     val address: String, //Адрес
     val email: String? = null, //E-mail
-)
+) {
+    fun initials(): String {
+        val first = name.firstOrNull()?.uppercaseChar()
+        val second = familyName.firstOrNull()?.uppercaseChar()
+
+        return listOfNotNull(first, second)
+            .joinToString("")
+    }
+}
